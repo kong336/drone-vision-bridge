@@ -51,6 +51,7 @@ mp257/
   udp_detection_receiver.py       listens for Jetson UDP packets
   poll_latest.py                  HTTP polling fallback
   check_vision_receiver.sh        receiver health check
+  check_full_stack.sh             one-command Jetson/vision/MAVLink health check
   uwb_aoa_reader.py               ALX-AOA-FIT UART frame parser
   mission_state_machine.py        dry-run mission state machine
   flight_link_probe.py            read-only USB serial and MAVLink heartbeat probe
@@ -61,6 +62,7 @@ deployment/systemd/
 docs/
   deployment.md                   setup and runbook
   ethernet_link.md                direct Jetson-MP257 wired link
+  direct_ethernet_no_gateway.md   direct cable setup that preserves Internet routes
   protocols.md                    JSON and UWB/AOA frame notes
   state_machine.md                monitor-only mission state machine
 ```

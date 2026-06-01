@@ -64,6 +64,12 @@ Check receiver state:
 sh /root/vision_comm/check_vision_receiver.sh
 ```
 
+Check the full running stack:
+
+```bash
+sh /root/vision_comm/check_full_stack.sh
+```
+
 Probe the flight controller without sending any command:
 
 ```bash
