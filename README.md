@@ -60,6 +60,7 @@ docs/
   deployment.md                   setup and runbook
   ethernet_link.md                direct Jetson-MP257 wired link
   protocols.md                    JSON and UWB/AOA frame notes
+  state_machine.md                monitor-only mission state machine
 ```
 
 ## Quick Start
@@ -90,3 +91,18 @@ For onboard Jetson-to-STM32MP257 vision packets, a direct Ethernet link is the b
 
 For hard real-time actuator and flight stabilization, keep the flight controller in charge and use appropriate control links such as MAVLink over UART, CAN, PWM, or the flight controller's native buses.
 
+## Monitor-Only State Machine
+
+The MP257 state machine is intentionally dry-run by default:
+
+```bash
+python3 mp257/mission_state_machine.py --once
+```
+
+With a future MAVLink heartbeat source:
+
+```bash
+python3 mp257/mission_state_machine.py --mavlink-serial /dev/ttyUSB0 --mavlink-baud 57600 --require-flight
+```
+
+It prints target state and proposed dry-run commands, but does not arm the aircraft or send movement commands.
