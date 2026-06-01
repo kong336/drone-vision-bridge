@@ -1,0 +1,19 @@
+[Unit]
+Description=STM32MP257 dry-run drone mission state machine
+After=network-online.target vision-udp-receiver.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/vision_comm
+Environment=VISION_LATEST=/root/vision_comm/latest_udp.json
+Environment=MISSION_PERIOD=1.0
+Environment=MAVLINK_SERIAL=
+Environment=MAVLINK_BAUD=115200
+Environment=MAVLINK_UDP_PORT=
+ExecStart=/bin/sh -c 'set --; if [ -n "$MAVLINK_SERIAL" ]; then set -- "$@" --mavlink-serial "$MAVLINK_SERIAL" --mavlink-baud "$MAVLINK_BAUD"; fi; if [ -n "$MAVLINK_UDP_PORT" ]; then set -- "$@" --mavlink-udp-port "$MAVLINK_UDP_PORT"; fi; exec /usr/bin/python3 /root/vision_comm/mission_state_machine.py --vision-latest "$VISION_LATEST" --period "$MISSION_PERIOD" --require-flight "$@"'
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

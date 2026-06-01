@@ -29,18 +29,20 @@ Start the live COCO + depth service:
 
 ```bash
 cd /home/nvidia/vision_starter
-UDP_HOST=192.168.1.175 UDP_PORT=5005 ./start_coco_depth_service.sh
+UDP_HOST=MP257_IP_OR_HOSTNAME UDP_PORT=5005 ./start_coco_depth_service.sh
 ```
 
 Useful overrides:
 
 ```bash
-UDP_HOST=10.10.10.2
+UDP_HOST=100.x.y.z
 UDP_PORT=5005
 UDP_RATE=20
 ENGINE=models/yolov8n_320_fp16.engine
 DEPTH_JSON=/tmp/orbbec_depth_grid.json
 ```
+
+Use the direct Ethernet address for onboard flight tests. Use the MP257 Tailscale IP or MagicDNS name for remote debugging when the boards are not on the same LAN.
 
 ## STM32MP257
 
@@ -62,6 +64,22 @@ Check receiver state:
 sh /root/vision_comm/check_vision_receiver.sh
 ```
 
+Probe the flight controller without sending any command:
+
+```bash
+python3 /root/vision_comm/flight_link_probe.py --serial /dev/serial/by-id/YOUR_FLIGHT_CONTROLLER --baud 115200
+```
+
+Run the dry-run state machine with a required MAVLink heartbeat:
+
+```bash
+python3 /root/vision_comm/mission_state_machine.py \
+  --vision-latest /root/vision_comm/latest_udp.json \
+  --mavlink-serial /dev/serial/by-id/YOUR_FLIGHT_CONTROLLER \
+  --mavlink-baud 115200 \
+  --require-flight
+```
+
 ## UWB/AOA
 
 Read ALX-AOA-FIT frames from a UART:
@@ -71,4 +89,3 @@ python3 /root/vision_comm/uwb_aoa_reader.py --serial /dev/ttySTM1 --baud 115200
 ```
 
 The script prints JSON lines containing `distance_m`, `azimuth_deg`, and `elevation_deg`.
-

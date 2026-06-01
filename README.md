@@ -6,7 +6,7 @@ This repository contains the small scripts and deployment notes used to connect:
 
 - NVIDIA Jetson Xavier NX for camera capture, TensorRT YOLO inference, Orbbec depth sampling, HTTP preview, and UDP JSON output.
 - STM32MP257 running OpenSTLinux for receiving Jetson vision packets, polling fallback HTTP, and parsing ALX-AOA-FIT UWB/AOA UART frames.
-- A flight/arm controller layer that can later consume the fused target state.
+- A monitor-only flight/arm controller layer that reads MAVLink heartbeat before any future control work.
 
 Large artifacts are intentionally excluded from git: TensorRT engines, ONNX files, YOLO weights, datasets, videos, logs, and vendor SDK archives.
 
@@ -52,6 +52,8 @@ mp257/
   poll_latest.py                  HTTP polling fallback
   check_vision_receiver.sh        receiver health check
   uwb_aoa_reader.py               ALX-AOA-FIT UART frame parser
+  mission_state_machine.py        dry-run mission state machine
+  flight_link_probe.py            read-only USB serial and MAVLink heartbeat probe
 
 deployment/systemd/
   example services for Jetson and STM32MP257
@@ -69,7 +71,7 @@ On the Jetson:
 
 ```bash
 cd /home/nvidia/vision_starter
-UDP_HOST=192.168.1.175 ./start_coco_depth_service.sh
+UDP_HOST=MP257_IP_OR_HOSTNAME ./start_coco_depth_service.sh
 ```
 
 On the STM32MP257:
@@ -102,7 +104,7 @@ python3 mp257/mission_state_machine.py --once
 With a future MAVLink heartbeat source:
 
 ```bash
-python3 mp257/mission_state_machine.py --mavlink-serial /dev/ttyUSB0 --mavlink-baud 57600 --require-flight
+python3 mp257/mission_state_machine.py --mavlink-serial /dev/serial/by-id/YOUR_FLIGHT_CONTROLLER --mavlink-baud 115200 --require-flight
 ```
 
 It prints target state and proposed dry-run commands, but does not arm the aircraft or send movement commands.

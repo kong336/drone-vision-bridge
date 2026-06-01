@@ -37,8 +37,8 @@ If a MAVLink telemetry stream is available later:
 
 ```bash
 python3 /root/vision_comm/mission_state_machine.py \
-  --mavlink-serial /dev/ttyUSB0 \
-  --mavlink-baud 57600 \
+  --mavlink-serial /dev/serial/by-id/YOUR_FLIGHT_CONTROLLER \
+  --mavlink-baud 115200 \
   --require-flight
 ```
 
@@ -59,5 +59,13 @@ python3 /root/vision_comm/mission_state_machine.py \
 
 ## Current Board Finding
 
-On the inspected STM32MP257, only `/dev/ttySTM0` was visible and it was used by `serial-getty@ttySTM0.service`. No `/dev/ttyACM*` or `/dev/ttyUSB*` flight controller device was present. That matches an unpowered flight controller, a disconnected cable, or a non-USB wiring path that has not been mapped yet.
+When a CUAV flight controller is powered over USB, the inspected STM32MP257 exposed two ACM ports:
 
+```text
+/dev/ttyACM0
+/dev/ttyACM1
+/dev/serial/by-id/usb-ArduPilot_CUAVv5-bdshot_...-if00
+/dev/serial/by-id/usb-ArduPilot_CUAVv5-bdshot_...-if02
+```
+
+Both ACM ports produced MAVLink heartbeat during the bench check. Prefer the `/dev/serial/by-id/...` path in services because it is stable across reboots and USB re-enumeration.

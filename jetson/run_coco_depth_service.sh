@@ -3,7 +3,7 @@ set -eu
 
 cd /home/nvidia/vision_starter
 
-UDP_HOST="${UDP_HOST:-192.168.1.175}"
+UDP_HOST="${UDP_HOST:-stm32mp257}"
 UDP_PORT="${UDP_PORT:-5005}"
 ENGINE="${ENGINE:-models/yolov8n_320_fp16.engine}"
 DEPTH_JSON="${DEPTH_JSON:-/tmp/orbbec_depth_grid.json}"

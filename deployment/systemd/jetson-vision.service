@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=simple
 User=nvidia
 WorkingDirectory=/home/nvidia/vision_starter
-Environment=UDP_HOST=192.168.1.175
+Environment=UDP_HOST=stm32mp257
 Environment=UDP_PORT=5005
 ExecStart=/home/nvidia/vision_starter/run_coco_depth_service.sh
 Restart=on-failure
@@ -15,4 +15,3 @@ RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
-
