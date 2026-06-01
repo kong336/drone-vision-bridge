@@ -1,0 +1,14 @@
+[Unit]
+Description=STM32MP257 Jetson vision UDP receiver
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/vision_comm
+ExecStart=/usr/bin/python3 /root/vision_comm/udp_detection_receiver.py --port 5005
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Logs and runtime state
+*.log
+*.pid
+latest_*.json
+outputs/
+logs/
+Log/
+
+# Datasets and captures
+datasets/
+captures/
+runs/
+*.mp4
+*.avi
+*.mkv
+*.jpg
+*.jpeg
+*.png
+
+# Model artifacts are intentionally not stored in git.
+*.pt
+*.onnx
+*.engine
+*.plan
+*.weights
+
+# Vendor SDK archives and extracted binary SDKs
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+vendor/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
