@@ -199,17 +199,19 @@ def draw(frame, detections, infer_fps, label_name, depth=None):
 
     cv2.line(frame, (center_x, 0), (center_x, h), (255, 255, 255), 1)
     cv2.line(frame, (0, center_y), (w, center_y), (255, 255, 255), 1)
+    cv2.circle(frame, (center_x, center_y), 4, (255, 255, 255), -1)
+    cv2.putText(frame, f"screen center=({center_x},{center_y})", (center_x + 8, center_y - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.48, (255, 255, 255), 1)
     cv2.putText(frame, f"{label_name} TensorRT fps={infer_fps:.1f}", (12, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.72, (0, 255, 255), 2)
     if distance_m is not None:
         suffix = " stale" if stale else ""
-        cv2.putText(frame, f"distance={distance_m:.3f}m {distance_method}{suffix}", (12, 58), cv2.FONT_HERSHEY_SIMPLEX, 0.64, (255, 255, 0), 2)
+        cv2.putText(frame, f"scene/center distance={distance_m:.3f}m {distance_method}{suffix}", (12, 58), cv2.FONT_HERSHEY_SIMPLEX, 0.64, (255, 255, 0), 2)
     else:
         cv2.putText(frame, f"distance unavailable depth={depth_status}", (12, 58), cv2.FONT_HERSHEY_SIMPLEX, 0.64, (0, 165, 255), 2)
     if not detections:
         cv2.putText(frame, "not found", (12, 88), cv2.FONT_HERSHEY_SIMPLEX, 0.72, (0, 0, 255), 2)
         return frame
 
-    for det in detections[:5]:
+    for det in detections:
         box, score, class_id = det
         det_label = label_for(label_name, class_id)
         x, y, bw, bh = box
@@ -224,7 +226,25 @@ def draw(frame, detections, infer_fps, label_name, depth=None):
         cv2.circle(frame, (cx, cy), 5, (0, 0, 255), -1)
         cv2.line(frame, (center_x, center_y), (cx, cy), (0, 255, 255), 2)
         distance_text = f" dist={item_distance_m:.2f}m" if item_distance_m is not None else ""
-        cv2.putText(frame, f"{det_label} {score:.2f}{distance_text} dx={dx:+d} dy={dy:+d}", (x, max(24, y - 8)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 0), 2)
+        text_y = max(24, y - 8)
+        cv2.putText(
+            frame,
+            f"{det_label} {score:.2f}{distance_text}",
+            (x, text_y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.62,
+            (0, 255, 0),
+            2,
+        )
+        cv2.putText(
+            frame,
+            f"center=({cx},{cy}) offset=({dx:+d},{dy:+d})",
+            (x, min(h - 8, text_y + 22)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.52,
+            (0, 255, 255),
+            2,
+        )
     return frame
 
 
