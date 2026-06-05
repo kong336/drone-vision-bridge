@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MP257 manipulator dry-run action",
+  "type": "object",
+  "required": ["time", "arm_dry_run"],
+  "properties": {
+    "time": {"type": "number"},
+    "arm_dry_run": {
+      "type": "object",
+      "required": ["mode", "reason"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "hold",
+            "track_only",
+            "blocked_requires_enable_file",
+            "would_close_gripper",
+            "failsafe_hold"
+          ]
+        },
+        "reason": {"type": ["string", "null"]},
+        "age_sec": {"type": ["number", "null"], "minimum": 0},
+        "enable_file": {"type": "string"},
+        "state_command": {"type": "object"},
+        "target": {
+          "type": "object",
+          "properties": {
+            "class": {"type": ["string", "null"]},
+            "conf": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "distance_m": {"type": ["number", "null"], "minimum": 0},
+            "dx": {"type": ["number", "null"]},
+            "dy": {"type": ["number", "null"]}
+          }
+        }
+      }
+    }
+  }
+}

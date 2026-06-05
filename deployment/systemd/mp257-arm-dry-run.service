@@ -1,0 +1,17 @@
+[Unit]
+Description=STM32MP257 dry-run manipulator monitor
+After=mp257-mission-state-machine.service
+Wants=mp257-mission-state-machine.service
+
+[Service]
+Type=simple
+WorkingDirectory=/root/vision_comm
+Environment=DECISION_LATEST=/root/vision_comm/latest_decision.json
+Environment=ARM_ACTION_LATEST=/root/vision_comm/latest_arm_action.json
+Environment=ARM_DRY_RUN_ENABLE_FILE=/root/vision_comm/ENABLE_ARM_DRY_RUN
+ExecStart=/bin/sh -c 'exec /usr/bin/python3 /root/vision_comm/arm_dry_run_monitor.py --decision-latest "$DECISION_LATEST" --action-latest "$ARM_ACTION_LATEST" --enable-file "$ARM_DRY_RUN_ENABLE_FILE"'
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

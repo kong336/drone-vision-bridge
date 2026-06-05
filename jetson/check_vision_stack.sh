@@ -2,7 +2,10 @@
 set -eu
 
 echo "--- services ---"
-systemctl --no-pager --plain status orbbec-depth-grid.service vision-coco-depth.service 2>/dev/null | sed -n '1,80p' || true
+systemctl --no-pager --plain status orbbec-depth-grid.service jetson-vision.service 2>/dev/null | sed -n '1,100p' || true
+echo "--- old duplicate service ---"
+systemctl is-enabled vision-coco-depth.service 2>/dev/null || true
+systemctl is-active vision-coco-depth.service 2>/dev/null || true
 echo "--- processes ---"
 pgrep -af 'depth_grid_daemon|trt_yolo_server.py' || true
 echo "--- usb ---"

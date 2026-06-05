@@ -1,0 +1,33 @@
+{
+  "enabled": false,
+  "notes": [
+    "Template only. Do not rename to arm_servo_config.json and enable until propellers are removed, servo power is current-limited, and the gripper is tested on the bench.",
+    "All real servo output code must clamp pulses to the min and max below and must refuse stale latest_arm_action.json files."
+  ],
+  "controller": {
+    "type": "external_pwm_driver_or_verified_gpio_pwm",
+    "update_hz": 50,
+    "power": "servo rail 8-14V, separate from MP257 5V rail, common ground only if the wiring design requires it and has been checked"
+  },
+  "channels": [
+    {
+      "name": "gripper",
+      "channel": 0,
+      "pulse_us": {
+        "min": 900,
+        "open": 1100,
+        "neutral": 1500,
+        "close": 1900,
+        "max": 2100
+      },
+      "rate_limit_us_per_s": 300
+    }
+  ],
+  "guards": {
+    "required_action_mode": "would_close_gripper",
+    "max_action_age_sec": 0.5,
+    "enable_file": "/root/vision_comm/ENABLE_REAL_ARM_OUTPUT",
+    "start_pose": "open",
+    "failsafe_pose": "open"
+  }
+}

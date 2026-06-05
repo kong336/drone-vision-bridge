@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from mission_state_machine import MavlinkMonitor
+from mission_state_machine import MavlinkMonitor, auto_detect_mavlink_serial
 
 
 def trim_text(text: str, tail_lines: int | None = None, contains: list[str] | None = None) -> str:
@@ -66,9 +66,14 @@ def serial_devices() -> list[dict[str, Any]]:
 
 
 def poll_mavlink(args: argparse.Namespace) -> dict[str, Any]:
-    if not args.serial and args.udp_port is None:
+    serial = args.serial
+    if serial == "auto":
+        serial = auto_detect_mavlink_serial()
+        if serial is None:
+            return {"checked": True, "ok": False, "reason": "auto serial requested but no ArduPilot/PX4 by-id device found"}
+    if not serial and args.udp_port is None:
         return {"checked": False, "reason": "no --serial or --udp-port provided"}
-    mon = MavlinkMonitor(serial_path=args.serial, baud=args.baud, udp_port=args.udp_port)
+    mon = MavlinkMonitor(serial_path=serial, baud=args.baud, udp_port=args.udp_port)
     started = time.time()
     try:
         mon.open()
@@ -83,6 +88,7 @@ def poll_mavlink(args: argparse.Namespace) -> dict[str, Any]:
         return {
             "checked": True,
             "ok": latest.ok,
+            "serial": serial,
             "age_sec": round(latest.age_sec, 3) if latest.age_sec is not None else None,
             "system_id": latest.system_id,
             "component_id": latest.component_id,
@@ -96,7 +102,7 @@ def poll_mavlink(args: argparse.Namespace) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Read-only MP257 flight-link probe. It never sends MAVLink commands.")
-    parser.add_argument("--serial", default=None, help="Serial device to monitor, for example /dev/ttyACM0.")
+    parser.add_argument("--serial", default=None, help="Serial device to monitor, for example /dev/ttyACM0, or 'auto'.")
     parser.add_argument("--baud", type=int, default=57600)
     parser.add_argument("--udp-port", type=int, default=None, help="UDP port to listen on for MAVLink heartbeat.")
     parser.add_argument("--seconds", type=float, default=3.0)

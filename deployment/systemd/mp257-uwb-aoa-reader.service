@@ -1,0 +1,17 @@
+[Unit]
+Description=STM32MP257 ALX-AOA-FIT UWB/AOA reader
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/vision_comm
+Environment=UWB_SERIAL=/dev/ttySTM1
+Environment=UWB_BAUD=115200
+Environment=UWB_LATEST=/root/vision_comm/latest_uwb.json
+ExecStart=/bin/sh -c 'exec /usr/bin/python3 /root/vision_comm/uwb_aoa_reader.py --serial "$UWB_SERIAL" --baud "$UWB_BAUD" --latest "$UWB_LATEST"'
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

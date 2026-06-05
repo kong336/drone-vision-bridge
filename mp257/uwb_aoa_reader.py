@@ -8,6 +8,7 @@ import select
 import sys
 import time
 from dataclasses import dataclass
+from pathlib import Path
 
 
 HEADER = b"\xff\xff\xff\xff"
@@ -107,6 +108,24 @@ def parse_stream_bytes(data: bytes) -> list[dict]:
     return messages
 
 
+def write_latest(path: Path | None, msg: dict) -> None:
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    msg = dict(msg)
+    msg["_received_time"] = time.time()
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    tmp.write_text(json.dumps(msg, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    for attempt in range(5):
+        try:
+            tmp.replace(path)
+            return
+        except PermissionError:
+            if attempt == 4:
+                raise
+            time.sleep(0.05)
+
+
 def configure_serial(fd: int, baud: int) -> None:
     if os.name == "nt":
         raise SystemExit("serial mode is intended for Linux on the STM32MP257; use --hex on Windows")
@@ -137,7 +156,7 @@ def configure_serial(fd: int, baud: int) -> None:
     termios.tcsetattr(fd, termios.TCSANOW, attrs)
 
 
-def read_serial(path: str, baud: int) -> None:
+def read_serial(path: str, baud: int, latest: Path | None = None) -> None:
     fd = os.open(path, os.O_RDONLY | os.O_NOCTTY | os.O_NONBLOCK)
     try:
         configure_serial(fd, baud)
@@ -156,6 +175,8 @@ def read_serial(path: str, baud: int) -> None:
                 if result.consumed == 0:
                     break
                 if result.message is not None:
+                    if result.message.get("cmd") == "location":
+                        write_latest(latest, result.message)
                     print(json.dumps(result.message, ensure_ascii=False), flush=True)
                 buffer = buffer[result.consumed :]
     finally:
@@ -167,16 +188,19 @@ def main() -> int:
     parser.add_argument("--hex", help="Parse one or more hex frames, for example: 'FF FF FF FF ...'")
     parser.add_argument("--serial", help="Linux serial device, for example /dev/ttySTM1 or /dev/ttyUSB0")
     parser.add_argument("--baud", type=int, default=115200)
+    parser.add_argument("--latest", default=None, help="Optional path to write the latest location JSON.")
     args = parser.parse_args()
 
     if args.hex:
         data = bytes.fromhex(args.hex)
         for msg in parse_stream_bytes(data):
+            if msg.get("cmd") == "location":
+                write_latest(Path(args.latest) if args.latest else None, msg)
             print(json.dumps(msg, ensure_ascii=False))
         return 0
 
     if args.serial:
-        read_serial(args.serial, args.baud)
+        read_serial(args.serial, args.baud, Path(args.latest) if args.latest else None)
         return 0
 
     parser.print_help(sys.stderr)

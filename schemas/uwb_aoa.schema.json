@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ALX-AOA-FIT UWB/AOA latest packet",
+  "type": "object",
+  "required": ["ok", "cmd"],
+  "properties": {
+    "ok": {"type": "boolean"},
+    "cmd": {"type": "string", "enum": ["location", "heartbeat"]},
+    "version": {"type": ["integer", "null"], "minimum": 0},
+    "sequence_id": {"type": ["integer", "null"], "minimum": 0},
+    "anchor_id": {"type": ["integer", "null"], "minimum": 0},
+    "tag_id": {"type": ["integer", "null"], "minimum": 0},
+    "distance_cm": {"type": ["integer", "null"], "minimum": 0},
+    "distance_m": {"type": ["number", "null"], "minimum": 0},
+    "azimuth_deg": {"type": ["number", "null"]},
+    "elevation_deg": {"type": ["number", "null"]},
+    "tag_status": {"type": ["integer", "null"], "minimum": 0},
+    "batch_sn": {"type": ["integer", "null"], "minimum": 0},
+    "checksum": {"type": ["integer", "null"], "minimum": 0, "maximum": 255},
+    "_received_time": {"type": ["number", "null"]}
+  }
+}

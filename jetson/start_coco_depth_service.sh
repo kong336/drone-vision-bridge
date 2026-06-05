@@ -7,6 +7,8 @@ UDP_HOST="${UDP_HOST:-stm32mp257}"
 UDP_PORT="${UDP_PORT:-5005}"
 UDP_RATE="${UDP_RATE:-10}"
 ENGINE="${ENGINE:-models/yolov8n_320_fp16.engine}"
+LABEL="${LABEL:-coco}"
+CONF="${CONF:-0.15}"
 DEPTH_JSON="${DEPTH_JSON:-/tmp/orbbec_depth_grid.json}"
 
 PIDS="$(pgrep -f 'python3 scripts/trt_yolo_server.py' || true)"
@@ -48,8 +50,8 @@ nohup python3 scripts/trt_yolo_server.py \
   --infer-fps 0 \
   --fourcc MJPG \
   --quality 65 \
-  --label coco \
-  --conf 0.15 \
+  --label "$LABEL" \
+  --conf "$CONF" \
   --depth-json "$DEPTH_JSON" \
   --depth-max-age 2.0 \
   > logs/trt_yolo_server.log 2>&1 < /dev/null &

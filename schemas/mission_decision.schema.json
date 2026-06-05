@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MP257 mission decision",
+  "type": "object",
+  "required": ["time", "state", "reason", "command", "context", "vision", "uwb", "flight"],
+  "properties": {
+    "time": {"type": "number"},
+    "state": {
+      "type": "string",
+      "enum": [
+        "BOOT",
+        "WAIT_LINKS",
+        "WAIT_FLIGHT_SAFE",
+        "IDLE_SAFE",
+        "UWB_SEARCH",
+        "UWB_APPROACH",
+        "VISION_LOCK",
+        "FINE_ALIGN",
+        "GRAB_READY",
+        "GRAB_DRY_RUN",
+        "HOLD",
+        "FAILSAFE"
+      ]
+    },
+    "reason": {"type": "string"},
+    "command": {"type": "object"},
+    "context": {
+      "type": "object",
+      "required": ["vision_lock_count", "centered_count", "grab_ready_count"],
+      "properties": {
+        "vision_lock_count": {"type": "integer", "minimum": 0},
+        "centered_count": {"type": "integer", "minimum": 0},
+        "grab_ready_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "vision": {
+      "type": "object",
+      "required": ["ok", "age_sec", "class", "conf", "distance_m", "dx", "dy"],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "age_sec": {"type": ["number", "null"], "minimum": 0},
+        "class": {"type": ["string", "null"]},
+        "conf": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "distance_m": {"type": ["number", "null"], "minimum": 0},
+        "dx": {"type": ["number", "null"]},
+        "dy": {"type": ["number", "null"]}
+      }
+    },
+    "uwb": {
+      "type": "object",
+      "required": ["ok", "age_sec", "distance_m", "azimuth_deg", "elevation_deg"],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "age_sec": {"type": ["number", "null"], "minimum": 0},
+        "distance_m": {"type": ["number", "null"], "minimum": 0},
+        "azimuth_deg": {"type": ["number", "null"]},
+        "elevation_deg": {"type": ["number", "null"]}
+      }
+    },
+    "flight": {
+      "type": "object",
+      "required": ["ok", "age_sec", "armed", "system_status"],
+      "properties": {
+        "ok": {"type": "boolean"},
+        "age_sec": {"type": ["number", "null"], "minimum": 0},
+        "armed": {"type": ["boolean", "null"]},
+        "system_status": {"type": ["integer", "null"]}
+      }
+    }
+  }
+}

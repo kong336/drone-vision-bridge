@@ -1,0 +1,25 @@
+name: Local stack tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Windows offline stack checks
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run offline tests
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File tests\run_local_tests.ps1

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Jetson vision latest packet",
+  "type": "object",
+  "required": ["status", "valid"],
+  "properties": {
+    "status": {"type": "string", "enum": ["ok", "no_target", "error"]},
+    "valid": {"type": "boolean"},
+    "source": {"type": ["string", "integer", "null"]},
+    "timestamp": {"type": ["number", "null"]},
+    "fps": {"type": ["number", "null"], "minimum": 0},
+    "image": {
+      "type": "object",
+      "properties": {
+        "w": {"type": "integer", "minimum": 1},
+        "h": {"type": "integer", "minimum": 1},
+        "center_x": {"type": "integer"},
+        "center_y": {"type": "integer"}
+      }
+    },
+    "target": {
+      "type": ["object", "null"],
+      "required": ["class", "conf"],
+      "properties": {
+        "class": {"type": "string"},
+        "conf": {"type": "number", "minimum": 0, "maximum": 1},
+        "distance_m": {"type": ["number", "null"], "minimum": 0},
+        "box": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "w": {"type": "number", "minimum": 0},
+            "h": {"type": "number", "minimum": 0}
+          }
+        },
+        "center": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"}
+          }
+        },
+        "offset": {
+          "type": "object",
+          "properties": {
+            "dx": {"type": "number"},
+            "dy": {"type": "number"}
+          }
+        }
+      }
+    },
+    "detections": {"type": "array"},
+    "depth": {"type": "object"},
+    "_received": {
+      "type": "object",
+      "properties": {
+        "from": {"type": "string"},
+        "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+        "time": {"type": "number"}
+      }
+    }
+  }
+}

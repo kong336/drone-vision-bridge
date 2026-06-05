@@ -1,0 +1,15 @@
+{"name":"grab_stable_01","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.42,"offset":{"dx":5,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_02","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.42,"offset":{"dx":5,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_03","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.41,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_04","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.41,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_05","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_06","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_07","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_08","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_09","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_10","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_11","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_12","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_13","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_14","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
+{"name":"grab_stable_15","vision":{"status":"ok","valid":true,"target":{"class":"wrench","conf":0.96,"distance_m":0.40,"offset":{"dx":4,"dy":0}},"detections":[{}],"fps":24.0}}
