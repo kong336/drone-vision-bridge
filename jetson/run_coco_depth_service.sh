@@ -10,6 +10,12 @@ ENGINE="${ENGINE:-models/yolov8n_320_fp16.engine}"
 LABEL="${LABEL:-coco}"
 CONF="${CONF:-0.15}"
 DEPTH_JSON="${DEPTH_JSON:-/tmp/orbbec_depth_grid.json}"
+CAMERA_FX="${CAMERA_FX:-0}"
+CAMERA_FY="${CAMERA_FY:-0}"
+CAMERA_CX="${CAMERA_CX:-320}"
+CAMERA_CY="${CAMERA_CY:-240}"
+CAMERA_HFOV_DEG="${CAMERA_HFOV_DEG:-60}"
+CAMERA_VFOV_DEG="${CAMERA_VFOV_DEG:-45}"
 
 SOURCE_ID="$(python3 - <<'PY'
 import cv2
@@ -50,4 +56,10 @@ exec /usr/bin/python3 scripts/trt_yolo_server.py \
   --label "$LABEL" \
   --conf "$CONF" \
   --depth-json "$DEPTH_JSON" \
-  --depth-max-age 2.0
+  --depth-max-age 2.0 \
+  --camera-fx "$CAMERA_FX" \
+  --camera-fy "$CAMERA_FY" \
+  --camera-cx "$CAMERA_CX" \
+  --camera-cy "$CAMERA_CY" \
+  --camera-hfov-deg "$CAMERA_HFOV_DEG" \
+  --camera-vfov-deg "$CAMERA_VFOV_DEG"

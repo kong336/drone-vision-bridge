@@ -15,11 +15,15 @@ def summarize(msg):
     dx = offset.get('dx')
     dy = offset.get('dy')
     distance = target.get('distance_m', msg.get('distance_m'))
+    position = target.get('position_camera_m') or {}
     depth_ok = depth.get('ok')
     cls = target.get('class')
     conf = target.get('conf')
     dets = len(msg.get('detections') or [])
-    return f"status={status} valid={valid} class={cls} conf={conf} distance_m={distance} dx={dx} dy={dy} detections={dets} depth_ok={depth_ok}"
+    pos = ""
+    if position:
+        pos = f" x={position.get('x')} y={position.get('y')} z={position.get('z')}"
+    return f"status={status} valid={valid} class={cls} conf={conf} distance_m={distance} dx={dx} dy={dy}{pos} detections={dets} depth_ok={depth_ok}"
 
 
 def main():

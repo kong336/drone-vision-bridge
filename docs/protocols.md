@@ -18,13 +18,59 @@ The Jetson sends one JSON object per UDP datagram. Typical fields:
     "box": {"x": 250, "y": 180, "w": 120, "h": 90},
     "center": {"x": 310, "y": 225},
     "offset": {"dx": -10, "dy": -15},
-    "distance_m": 1.37
+    "distance_m": 1.37,
+    "position_camera_m": {
+      "x": -0.04,
+      "y": -0.05,
+      "z": 1.37,
+      "frame": "camera",
+      "axis": {"x": "right", "y": "down", "z": "forward"},
+      "method": "pinhole_fov_estimate"
+    }
   },
   "detections": []
 }
 ```
 
 `dx` and `dy` are pixel offsets from the image center. The MP257 can use them for slow visual alignment after coarse positioning.
+
+`position_camera_m` is the target position in the RGB camera coordinate frame:
+
+```text
+x: right from camera center, meters
+y: down from camera center, meters
+z: forward distance from camera, meters
+```
+
+The Jetson computes it from the target center pixel and depth:
+
+```text
+X = (u - cx) * Z / fx
+Y = (v - cy) * Z / fy
+Z = target depth in meters
+```
+
+Where `u,v` are the target center pixels, `cx,cy` are the camera principal point, and `fx,fy` are focal lengths in pixels. If calibrated intrinsics are not configured, the service can use a field-of-view estimate. That is useful for early bench testing, but calibrated `CAMERA_FX`, `CAMERA_FY`, `CAMERA_CX`, and `CAMERA_CY` should replace the estimate before using coordinates for real control.
+
+The Jetson obtains `distance_m` by sampling the Orbbec depth grid around the detected bounding box. If no valid depth cells are available inside the box, it falls back to the scene/center depth value when available. The JSON includes `distance_method` so the MP257 can tell whether the value came from the target box, image center, or frame average.
+
+The current service publishes the same JSON over HTTP at `/latest.json` and over UDP to the configured MP257 address. The MP257 receiver writes the latest packet to:
+
+```text
+/root/vision_comm/latest_udp.json
+```
+
+The receiver summary includes `dx`, `dy`, `distance_m`, and, when present, `x/y/z` camera coordinates.
+
+## Open-Source Coordinate Alternatives
+
+The current project keeps the Jetson side lightweight: detect one target, sample the depth grid, and publish one compact JSON packet. If a fuller 3D pipeline is needed later, use one of these established routes:
+
+- Orbbec `pyorbbecsdk`: official Python binding with RGB-D streaming, depth-color alignment, calibration access, and point cloud generation.
+- Orbbec SDK native utilities: suitable when staying in C/C++ and using SDK-provided coordinate transforms.
+- ROS 2 `depth_image_proc`: converts a depth image plus `CameraInfo` calibration into `PointCloud2`, including `PointCloudXyzNode` and related nodes.
+
+Those are heavier than the current UDP packet, but better if the controller needs a full point cloud, obstacle map, or frame transforms through ROS `tf`.
 
 ## MP257 Mission Decision JSON
 

@@ -40,6 +40,13 @@ def test_vision_latest_schema() -> None:
                 "conf": 0.96,
                 "distance_m": 0.4,
                 "offset": {"dx": 4, "dy": 0},
+                "position_camera_m": {
+                    "x": 0.003,
+                    "y": 0.0,
+                    "z": 0.4,
+                    "frame": "camera",
+                    "method": "pinhole_fov_estimate",
+                },
             },
             "detections": [{}],
             "_received": {"from": "127.0.0.1", "port": 5005, "time": 1780569000.0},

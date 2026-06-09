@@ -15,6 +15,16 @@ Jetson vision JSON
 
 The manipulator should not consume raw detections. It should consume `latest_arm_action.json`.
 
+For alignment before a grab, the lower-level controller can also inspect the filtered vision packet at `/root/vision_comm/latest_udp.json`. The useful target fields are:
+
+```text
+target.offset.dx/dy             pixel error from image center
+target.distance_m               target depth in meters
+target.position_camera_m.x/y/z  target camera-frame coordinates in meters
+```
+
+Use `dx/dy` for simple image-center alignment and `position_camera_m` for a future Cartesian controller. The current `position_camera_m` output is camera-frame only; it is not yet transformed into drone body frame or manipulator base frame. That transform needs camera mounting geometry before it can drive an arm safely.
+
 ## Current Safety Gates
 
 - target class must match `wrench`

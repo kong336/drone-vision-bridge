@@ -47,6 +47,19 @@
             "dx": {"type": "number"},
             "dy": {"type": "number"}
           }
+        },
+        "position_camera_m": {
+          "type": "object",
+          "required": ["x", "y", "z", "frame", "method"],
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "z": {"type": "number", "minimum": 0},
+            "frame": {"type": "string", "enum": ["camera"]},
+            "axis": {"type": "object"},
+            "method": {"type": "string", "enum": ["pinhole_intrinsics", "pinhole_fov_estimate"]},
+            "intrinsics": {"type": "object"}
+          }
         }
       }
     },

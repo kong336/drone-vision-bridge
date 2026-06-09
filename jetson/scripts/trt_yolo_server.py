@@ -432,7 +432,40 @@ def depth_distance(depth):
     return None, "unavailable"
 
 
-def build_message(detections, frame_shape, infer_fps, label_name, source, depth=None):
+def camera_position_m(cx, cy, distance_m, image_w, image_h, args):
+    if distance_m is None:
+        return None
+    fx = args.camera_fx
+    fy = args.camera_fy
+    px = args.camera_cx if args.camera_cx is not None else image_w / 2.0
+    py = args.camera_cy if args.camera_cy is not None else image_h / 2.0
+    method = "pinhole_intrinsics"
+    if fx <= 0 or fy <= 0:
+        if args.camera_hfov_deg <= 0 or args.camera_vfov_deg <= 0:
+            return None
+        fx = image_w / (2.0 * np.tan(np.deg2rad(args.camera_hfov_deg) / 2.0))
+        fy = image_h / (2.0 * np.tan(np.deg2rad(args.camera_vfov_deg) / 2.0))
+        method = "pinhole_fov_estimate"
+    z = float(distance_m)
+    x = (float(cx) - float(px)) * z / float(fx)
+    y = (float(cy) - float(py)) * z / float(fy)
+    return {
+        "x": round(x, 4),
+        "y": round(y, 4),
+        "z": round(z, 4),
+        "frame": "camera",
+        "axis": {"x": "right", "y": "down", "z": "forward"},
+        "method": method,
+        "intrinsics": {
+            "fx": round(float(fx), 3),
+            "fy": round(float(fy), 3),
+            "cx": round(float(px), 3),
+            "cy": round(float(py), 3),
+        },
+    }
+
+
+def build_message(detections, frame_shape, infer_fps, label_name, source, depth=None, args=None):
     h, w = frame_shape[:2]
     center_x, center_y = w // 2, h // 2
     items = []
@@ -458,6 +491,9 @@ def build_message(detections, frame_shape, infer_fps, label_name, source, depth=
         if item_distance_m is not None:
             item["distance_m"] = item_distance_m
             item["distance_method"] = item_distance_method
+            position = camera_position_m(cx, cy, item_distance_m, w, h, args) if args is not None else None
+            if position is not None:
+                item["position_camera_m"] = position
         items.append(item)
     message = {
         "valid": bool(items),
@@ -579,7 +615,7 @@ def start_vision_worker(args):
                     instant_fps = 1.0 / elapsed
                     smoothed_fps = 0.85 * smoothed_fps + 0.15 * instant_fps if smoothed_fps else instant_fps
                     depth_info = depth.snapshot()
-                    message = build_message(detections, frame.shape, smoothed_fps, args.label, args.source, depth_info)
+                    message = build_message(detections, frame.shape, smoothed_fps, args.label, args.source, depth_info, args)
                     annotated = draw(frame, detections, smoothed_fps, args.label, depth_info)
                     ok, jpg = cv2.imencode(".jpg", annotated, [int(cv2.IMWRITE_JPEG_QUALITY), args.quality])
                     if ok:
@@ -696,6 +732,12 @@ def main():
     parser.add_argument("--depth-samples", type=int, default=20, help="Depth frames per probe.")
     parser.add_argument("--depth-interval", type=float, default=0.2, help="Delay between depth probes.")
     parser.add_argument("--depth-timeout", type=float, default=8.0, help="Depth probe timeout in seconds.")
+    parser.add_argument("--camera-fx", type=float, default=0.0, help="RGB camera focal length in pixels on x axis.")
+    parser.add_argument("--camera-fy", type=float, default=0.0, help="RGB camera focal length in pixels on y axis.")
+    parser.add_argument("--camera-cx", type=float, default=None, help="RGB camera principal point x in pixels.")
+    parser.add_argument("--camera-cy", type=float, default=None, help="RGB camera principal point y in pixels.")
+    parser.add_argument("--camera-hfov-deg", type=float, default=0.0, help="Fallback horizontal FOV in degrees for approximate camera coordinates.")
+    parser.add_argument("--camera-vfov-deg", type=float, default=0.0, help="Fallback vertical FOV in degrees for approximate camera coordinates.")
     args = parser.parse_args()
 
     state = start_vision_worker(args)
