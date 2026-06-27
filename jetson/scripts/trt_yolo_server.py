@@ -5,10 +5,11 @@ import copy
 import json
 import os
 import socket
+import socketserver
 import subprocess
 import threading
 import time
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 import cv2
@@ -30,6 +31,10 @@ COCO_NAMES = [
     "cell_phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase",
     "scissors", "teddy_bear", "hair_drier", "toothbrush",
 ]
+
+
+class ThreadingHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
+    daemon_threads = True
 
 
 def cuda_check(code, name):
