@@ -63,6 +63,44 @@
         }
       }
     },
+    "target_smoothed": {
+      "type": ["object", "null"],
+      "properties": {
+        "class": {"type": "string"},
+        "conf": {"type": "number", "minimum": 0, "maximum": 1},
+        "source": {"type": "string", "enum": ["ema"]},
+        "alpha": {"type": "number", "minimum": 0, "maximum": 1},
+        "distance_m": {"type": ["number", "null"], "minimum": 0},
+        "center": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"}
+          }
+        },
+        "offset": {
+          "type": "object",
+          "properties": {
+            "dx": {"type": "number"},
+            "dy": {"type": "number"}
+          }
+        },
+        "position_camera_m": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "z": {"type": "number", "minimum": 0},
+            "frame": {"type": "string", "enum": ["camera"]},
+            "axis": {"type": "object"},
+            "method": {"type": "string"},
+            "intrinsics": {"type": "object"}
+          }
+        },
+        "raw_center": {"type": "object"},
+        "raw_offset": {"type": "object"}
+      }
+    },
     "detections": {"type": "array"},
     "depth": {"type": "object"},
     "_received": {

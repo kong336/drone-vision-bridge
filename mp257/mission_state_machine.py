@@ -295,7 +295,7 @@ def read_vision(path: Path, max_age: float) -> VisionState:
 def parse_vision_message(msg: dict[str, Any], max_age: float) -> VisionState:
     received = (msg.get("_received") or {}).get("time", msg.get("timestamp"))
     age = time.time() - float(received) if received else None
-    target = msg.get("target") or {}
+    target = msg.get("target_smoothed") or msg.get("target") or {}
     offset = target.get("offset") or {}
     distance = target.get("distance_m", msg.get("distance_m"))
     ok = msg.get("status") == "ok" and age is not None and age <= max_age

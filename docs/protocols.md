@@ -54,6 +54,22 @@ Where `u,v` are the target center pixels, `cx,cy` are the camera principal point
 
 The Jetson obtains `distance_m` by sampling the Orbbec depth grid around the detected bounding box. If no valid depth cells are available inside the box, it falls back to the scene/center depth value when available. The JSON includes `distance_method` so the MP257 can tell whether the value came from the target box, image center, or frame average.
 
+For moving approach and arm follow, the Jetson also publishes
+`target_smoothed` when a target is visible. It is an exponential moving average
+of the target center, pixel offset, depth, and `position_camera_m`. The raw
+`target` remains unchanged for debugging and model evaluation. The MP257 state
+machine uses `target_smoothed` first and falls back to `target` when the
+smoothed field is absent.
+
+The smoothing factor is controlled on the Jetson service with:
+
+```text
+--target-smooth-alpha 0.35
+```
+
+Use `0` to disable it. Lower values are steadier but lag more during fast
+motion; higher values track quicker but pass more detection jitter to the arm.
+
 The current service publishes the same JSON over HTTP at `/latest.json` and over UDP to the configured MP257 address. The MP257 receiver writes the latest packet to:
 
 ```text

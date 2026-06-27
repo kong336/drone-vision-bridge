@@ -69,6 +69,18 @@ Control should consume `/latest.json`, not the browser stream. Browser MJPEG
 smoothness is a debugging comfort metric; the control signal should be judged
 by timestamp freshness, FPS, confidence, and pose stability.
 
+The Jetson service publishes both the raw detector target and an optional
+EMA-smoothed control target:
+
+```text
+target           raw YOLO output
+target_smoothed  filtered center, offset, depth, and camera-frame position
+```
+
+The MP257 state machine reads `target_smoothed` first and falls back to
+`target` when the smoothed field is absent. This steadies arm follow while
+keeping raw detections available for debugging and model checks.
+
 ## Current Safety Gates
 
 - target class must match `wrench`

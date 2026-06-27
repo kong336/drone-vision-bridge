@@ -515,6 +515,66 @@ def build_message(detections, frame_shape, infer_fps, label_name, source, depth=
     return message
 
 
+class TargetSmoother:
+    def __init__(self, alpha):
+        self.alpha = max(0.0, min(1.0, float(alpha)))
+        self.target = None
+
+    @staticmethod
+    def _blend(old, new, alpha):
+        if old is None or new is None:
+            return new
+        return (1.0 - alpha) * float(old) + alpha * float(new)
+
+    @staticmethod
+    def _round(value, digits=4):
+        return round(float(value), digits) if value is not None else None
+
+    def update(self, message):
+        if self.alpha <= 0:
+            return message
+        raw = message.get("target")
+        if not raw:
+            self.target = None
+            return message
+
+        old = self.target or {}
+        raw_center = raw.get("center") or {}
+        raw_offset = raw.get("offset") or {}
+        old_center = old.get("center") or {}
+        old_offset = old.get("offset") or {}
+        smoothed = copy.deepcopy(raw)
+        smoothed["center"] = {
+            "x": self._round(self._blend(old_center.get("x"), raw_center.get("x"), self.alpha), 2),
+            "y": self._round(self._blend(old_center.get("y"), raw_center.get("y"), self.alpha), 2),
+        }
+        smoothed["offset"] = {
+            "dx": self._round(self._blend(old_offset.get("dx"), raw_offset.get("dx"), self.alpha), 2),
+            "dy": self._round(self._blend(old_offset.get("dy"), raw_offset.get("dy"), self.alpha), 2),
+        }
+        smoothed["distance_m"] = self._round(
+            self._blend(old.get("distance_m"), raw.get("distance_m"), self.alpha),
+            4,
+        )
+        raw_position = raw.get("position_camera_m") or {}
+        old_position = old.get("position_camera_m") or {}
+        if raw_position:
+            position = copy.deepcopy(raw_position)
+            for axis in ("x", "y", "z"):
+                position[axis] = self._round(
+                    self._blend(old_position.get(axis), raw_position.get(axis), self.alpha),
+                    4,
+                )
+            smoothed["position_camera_m"] = position
+        smoothed["source"] = "ema"
+        smoothed["alpha"] = self.alpha
+        smoothed["raw_center"] = raw_center
+        smoothed["raw_offset"] = raw_offset
+        self.target = smoothed
+        message["target_smoothed"] = smoothed
+        return message
+
+
 class VisionState:
     def __init__(self):
         self.lock = threading.Lock()
@@ -582,6 +642,7 @@ def start_vision_worker(args):
         raise RuntimeError(f"Expected square input, got {detector.input_shape}")
     input_size = input_h
     publisher = UdpPublisher(args.udp_host, args.udp_port, args.udp_rate)
+    smoother = TargetSmoother(args.target_smooth_alpha)
     if args.depth_json:
         depth = DepthFileReader(args.depth_json, args.depth_max_age)
     else:
@@ -622,6 +683,7 @@ def start_vision_worker(args):
                     smoothed_fps = 0.85 * smoothed_fps + 0.15 * instant_fps if smoothed_fps else instant_fps
                     depth_info = depth.snapshot()
                     message = build_message(detections, frame.shape, smoothed_fps, args.label, args.source, depth_info, args)
+                    message = smoother.update(message)
                     annotated = draw(frame, detections, smoothed_fps, args.label, depth_info)
                     ok, jpg = cv2.imencode(".jpg", annotated, [int(cv2.IMWRITE_JPEG_QUALITY), args.quality])
                     if ok:
@@ -746,6 +808,7 @@ def main():
     parser.add_argument("--camera-cy", type=float, default=None, help="RGB camera principal point y in pixels.")
     parser.add_argument("--camera-hfov-deg", type=float, default=0.0, help="Fallback horizontal FOV in degrees for approximate camera coordinates.")
     parser.add_argument("--camera-vfov-deg", type=float, default=0.0, help="Fallback vertical FOV in degrees for approximate camera coordinates.")
+    parser.add_argument("--target-smooth-alpha", type=float, default=0.35, help="EMA alpha for optional target_smoothed control output; 0 disables.")
     args = parser.parse_args()
 
     state = start_vision_worker(args)
