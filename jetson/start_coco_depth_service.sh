@@ -17,7 +17,20 @@ CAMERA_CY="${CAMERA_CY:-240}"
 CAMERA_HFOV_DEG="${CAMERA_HFOV_DEG:-60}"
 CAMERA_VFOV_DEG="${CAMERA_VFOV_DEG:-45}"
 
-PIDS="$(pgrep -f 'python3 scripts/trt_yolo_server.py' || true)"
+PIDS="$(python3 - <<'PY'
+import os
+
+for name in os.listdir("/proc"):
+    if not name.isdigit():
+        continue
+    try:
+        cmdline = open(f"/proc/{name}/cmdline", "rb").read().replace(b"\0", b" ").decode("utf-8", "replace")
+    except Exception:
+        continue
+    if "python3 scripts/trt_yolo_server.py" in cmdline:
+        print(name)
+PY
+)"
 if [ -n "$PIDS" ]; then
   kill $PIDS 2>/dev/null || true
 fi

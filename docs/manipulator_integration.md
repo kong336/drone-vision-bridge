@@ -25,6 +25,50 @@ target.position_camera_m.x/y/z  target camera-frame coordinates in meters
 
 Use `dx/dy` for simple image-center alignment and `position_camera_m` for a future Cartesian controller. The current `position_camera_m` output is camera-frame only; it is not yet transformed into drone body frame or manipulator base frame. That transform needs camera mounting geometry before it can drive an arm safely.
 
+## Close-Range Handoff
+
+Do not rely on pure 2D detection all the way into contact. The practical chain
+for the wrench task is:
+
+```text
+far / mid range:
+  RGB YOLO detects wrench at about 30 FPS
+  image error drives slow XY centering
+  Orbbec depth gives approximate z
+
+near range:
+  use the last stable RGB+depth pose
+  transform through hand-eye calibration into the arm base frame
+  execute a short guarded approach sequence
+  stop using the detector as the sole truth once the target is too close or
+  partially outside the image
+```
+
+The Jetson-side hand-eye prototype in `Dual_Camera_HandEye` already follows
+that shape:
+
+```text
+latest.json -> fused_wrench_pose_latest.json -> wrench_grasp_sequence_latest.json
+```
+
+`wrench_image_follow_preview.py` is only a sign/gain checker. It outputs small
+proposed XY steps and does not open a servo port. Use it to confirm direction
+before any real motion.
+
+For smoother video and steadier control, keep the browser stream lower than the
+inference loop:
+
+```text
+infer_fps=30
+display_fps=15-20
+max_detections=1
+capture_thread=enabled
+```
+
+Control should consume `/latest.json`, not the browser stream. Browser MJPEG
+smoothness is a debugging comfort metric; the control signal should be judged
+by timestamp freshness, FPS, confidence, and pose stability.
+
 ## Current Safety Gates
 
 - target class must match `wrench`

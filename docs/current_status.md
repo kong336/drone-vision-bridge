@@ -38,7 +38,7 @@ depth_json=/tmp/orbbec_depth_grid.json
 camera_hfov_deg=67
 camera_vfov_deg=52
 http_port=8090
-latest_status=source /dev/video1, about 30 FPS, depth ok
+latest_status=source /dev/video1, about 29 FPS, depth ok, fused pose valid
 ```
 
 The migrated board is still an NVIDIA Jetson Xavier NX Developer Kit, but it
@@ -85,6 +85,59 @@ Orbbec RGB source /dev/video1
 Orbbec depth grid JSON fused into latest.json
 single best wrench target for control handoff
 ```
+
+Jetson-side data transferred from the other training machine is under:
+
+```text
+/home/nvidia/Desktop/78arm/Dual_Camera_HandEye/yolo_training/datasets/
+```
+
+Observed dataset counts:
+
+```text
+wrench_autolabel_20260626: 30 train, 10 val
+wrench_autolabel_20260626_flight_aug: 150 train, 20 val
+wrench_motion_autolabel_20260626_214357: 40 train, 8 val
+wrench_motion_autolabel_20260626_214357_flight_aug: 160 train, 16 val
+wrench_combined_autolabel_20260626_flight_aug: 310 train, 36 val
+```
+
+The transferred labels were structurally valid YOLO labels for class `wrench`.
+The available training artifacts on the Jetson are the ONNX and TensorRT engine,
+not the original CPU-training `best.pt` or `runs/` metrics directory.
+
+Latest live validation on the migrated Jetson:
+
+```text
+latest.json valid=true
+target class=wrench
+confidence about 0.80
+rgb inference about 28.5-30 FPS
+depth source=/tmp/orbbec_depth_grid.json
+target distance about 0.276 m
+position_camera_m present
+fused_wrench_pose_latest.json valid=true
+wrench_grasp_sequence_latest.json valid=true
+```
+
+Current generated dry-run grasp plan from the live pose:
+
+```text
+pregrasp x=-108.512 mm, y=-38.080 mm, z=180.000 mm
+approach x=-108.512 mm, y=-38.080 mm, z=155.000 mm
+grasp close at z=155.000 mm
+lift z=190.000 mm
+return_home z=240.000 mm
+```
+
+The image-follow preview is stable around:
+
+```text
+err=(+0.22,-0.26), z=0.276 m, step_xy_mm=(+1.3,-1.5)
+```
+
+This is still a dry-run/preview signal. It should not directly move the arm
+until the physical bench safety checks and direction checks are complete.
 
 If the old Jetson or Windows training machine still has the YOLO training run,
 keep `best.pt`, the exported `.onnx`, the dataset YAML, and the train/val split.

@@ -566,8 +566,12 @@ class UdpPublisher:
         if self.min_interval and now - self.last_sent < self.min_interval:
             return
         payload = (json.dumps(message, separators=(",", ":")) + "\n").encode("utf-8")
-        self.sock.sendto(payload, self.addr)
-        self.last_sent = now
+        try:
+            self.sock.sendto(payload, self.addr)
+            self.last_sent = now
+        except OSError as exc:
+            message["udp_error"] = repr(exc)
+            self.last_sent = now
 
 
 def start_vision_worker(args):
