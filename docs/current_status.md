@@ -1,29 +1,96 @@
 # Current Status
 
-Updated: 2026-06-04
+Updated: 2026-06-27
 
 ## Jetson
 
-Current preview:
+Current migrated Jetson preview:
 
 ```text
-http://100.88.97.62:8090/
+http://192.168.1.80:8090/
 ```
 
-Current TensorRT engine:
+Current migrated Jetson latest JSON:
 
 ```text
-/home/nvidia/vision_starter/models/wrench_public_neg_320_fp16.engine
+http://192.168.1.80:8090/latest.json
 ```
 
-Current systemd state:
+Current migrated Jetson TensorRT engine:
 
 ```text
-jetson-vision.service active
-vision-coco-depth.service disabled
+/home/nvidia/vision_starter/models/wrench_combined_20260626_320_trt7_fp16.engine
 ```
 
-Current service override:
+Current migrated Jetson service shape:
+
+```text
+source=/dev/video1
+camera=Orbbec DaBai DCW2 RGB Camera
+resolution=640x480
+camera_fps=30
+fourcc=MJPG
+label=wrench
+conf=0.25
+iou=0.45
+max_detections=1
+depth_json=/tmp/orbbec_depth_grid.json
+camera_hfov_deg=67
+camera_vfov_deg=52
+http_port=8090
+latest_status=source /dev/video1, about 30 FPS, depth ok
+```
+
+The migrated board is still an NVIDIA Jetson Xavier NX Developer Kit, but it
+runs an older software stack than the previous deployment:
+
+```text
+new board: Ubuntu 18.04, JetPack 4.4.1, L4T 32.4.4, CUDA 10.2, TensorRT 7.1.3, OpenCV 3.4.5
+old board: Ubuntu 20.04.6, JetPack 5.1.6, L4T 35.6.4, CUDA 11.4, TensorRT 8.5.2.2, OpenCV 4.5.4
+```
+
+This version gap matters for TensorRT engine compatibility. Engines built on
+the previous JetPack 5 / TensorRT 8 stack should not be treated as portable to
+this JetPack 4 / TensorRT 7 board. Keep the ONNX file as the portable artifact
+and rebuild a board-local engine with the TensorRT 7 toolchain. The `trt7`
+suffix on the current `wrench_combined_20260626_320_trt7_fp16.engine` is the
+important compatibility marker.
+
+Useful retained model history:
+
+```text
+wrench_public_neg_320_fp16.engine
+```
+
+The old 24-image wrench model overfit badly. It false-detected all 60 captured
+negative background images. The `wrench_public_neg` model was trained with
+public wrench data plus local negative background images and produced zero
+detections on those 60 negative images during the local check.
+
+```text
+wrench_combined_20260626_320.onnx
+wrench_combined_20260626_320_trt7_fp16.engine
+```
+
+The June 26 wrench model is the current migrated-board candidate. The useful
+parts to carry forward are:
+
+```text
+public wrench positives
+local wrench captures
+local negative/background images
+320 input export
+FP16 TensorRT build on the target board
+Orbbec RGB source /dev/video1
+Orbbec depth grid JSON fused into latest.json
+single best wrench target for control handoff
+```
+
+If the old Jetson or Windows training machine still has the YOLO training run,
+keep `best.pt`, the exported `.onnx`, the dataset YAML, and the train/val split.
+Do not rely on the `.engine` alone; TensorRT engines are board/runtime-specific.
+
+Previous service override retained for the JetPack 5/Tailscale deployment:
 
 ```text
 UDP_HOST=100.88.127.115
@@ -33,8 +100,6 @@ ENGINE=models/wrench_public_neg_320_fp16.engine
 LABEL=wrench
 CONF=0.45
 ```
-
-The old 24-image wrench model overfit badly. It false-detected all 60 captured negative background images. The current model was trained with public wrench data plus local negative background images and produced zero detections on those 60 negative images during the local check.
 
 ## STM32MP257
 

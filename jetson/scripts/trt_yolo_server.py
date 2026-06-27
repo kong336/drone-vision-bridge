@@ -611,6 +611,8 @@ def start_vision_worker(args):
                     inp, scale, pad_x, pad_y = preprocess(frame, input_size)
                     output = detector.infer(inp)
                     detections = decode(output, frame.shape, scale, pad_x, pad_y, args.conf, args.iou)
+                    if args.max_detections > 0:
+                        detections = sorted(detections, key=lambda item: item[1], reverse=True)[: args.max_detections]
                     elapsed = max(1e-6, time.time() - started)
                     instant_fps = 1.0 / elapsed
                     smoothed_fps = 0.85 * smoothed_fps + 0.15 * instant_fps if smoothed_fps else instant_fps
@@ -721,6 +723,8 @@ def main():
     parser.add_argument("--fourcc", default="MJPG")
     parser.add_argument("--conf", type=float, default=0.25)
     parser.add_argument("--iou", type=float, default=0.45)
+    parser.add_argument("--max-detections", type=int, default=0, help="Limit detections after NMS; 0 keeps all.")
+    parser.add_argument("--capture-thread", action="store_true", help="Accepted for compatibility with threaded capture builds.")
     parser.add_argument("--quality", type=int, default=70)
     parser.add_argument("--label", default="snow_king")
     parser.add_argument("--udp-host", default="", help="Optional STM32MP257 UDP target IP.")
